@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: redis-sentinel
+  labels:
+    k8s-app: redis-sentinel
+spec:
+  selector:
+    matchLabels:
+      name: redis-sentinel
+  template:
+    metadata:
+      labels:
+        name: redis-sentinel
+        app: redis-sentinel
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: redis-sentinel
+        image: redis
+        command: ["redis-sentinel", /usr/local/etc/redis/sentinel.conf]
+        ports:
+        - containerPort: 26379
+        volumeMounts:
+        - name: redis-sentinel-config
+          mountPath: /usr/local/etc/redis
+      volumes:
+      - name: redis-sentinel-config
+        persistentVolumeClaim:
+          claimName: pvc-redis-sentinel
+      terminationGracePeriodSeconds: 30

@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  serviceName: "psg-primary"
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      nodeSelector:
+        node: master
+      initContainers:
+      - name: take-data-dir-ownership
+        image: crunchydata/crunchy-postgres:centos8-13.2-4.6.1
+        command: ["/bin/bash", "-c", "chown -R 26:26 /pgdata"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: data
+          mountPath: /pgdata
+      containers:
+      - name: db-primary
+        image: crunchydata/crunchy-postgres:centos8-13.2-4.6.1
+        env:
+        - name: MODE
+          value: "postgres"
+        - name: PG_MODE
+          value: "primary"
+        - name: PG_PRIMARY_USER
+          value: "enes"
+        - name: PG_PRIMARY_PASSWORD
+          value: "123"
+        - name: PG_USER
+          value: "user"
+        - name: PG_PASSWORD
+          value: "123"
+        - name: PG_DATABASE
+          value: "db"
+        - name: PG_ROOT_PASSWORD
+          value: "123"
+        - name: PG_PRIMARY_PORT
+          value: "5432"
+        - name: PGHOST
+          value: "/tmp"
+        ports:
+        - containerPort: 5432
+          #hostPort: 5432
+        volumeMounts:
+        - name: data
+          mountPath: /pgdata
+          readOnly: false
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-db
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-replica
+  labels:
+    app: postgres-replica
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-replica
+  serviceName: "psg-replica"
+  template:
+    metadata:
+      labels:
+        app: postgres-replica
+    spec:
+      nodeSelector:
+        node: worker
+      containers:
+      - name: db-replica
+        image: crunchydata/crunchy-postgres:centos8-13.2-4.6.1
+        env:
+        - name: MODE
+          value: "postgres"
+        - name: PG_PRIMARY_HOST
+          value: "psg-primary"
+        - name: PG_PRIMARY_PORT
+          value: "5432"
+        - name: PG_MODE
+          value: "replica"
+        - name: PG_PRIMARY_USER
+          value: "enes"
+        - name: PG_PRIMARY_PASSWORD
+          value: "123"
+        - name: PG_USER
+          value: "user"
+        - name: PG_PASSWORD
+          value: "123"
+        - name: PG_DATABASE
+          value: "db"
+        - name: PG_ROOT_PASSWORD
+          value: "123"
+        - name: PGDATA
+          value: "/pgdata"
+        ports:
+        - containerPort: 5432
+          #hostPort: 5432
+

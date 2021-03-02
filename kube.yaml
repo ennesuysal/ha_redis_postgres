@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  serviceName: "redis-master"
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      nodeSelector:
+        node: master
+      containers:
+      - name: redis-master
+        image: redis
+        command: ["redis-server", /usr/local/etc/redis/redis.conf]
+        ports:
+        - containerPort: 6379
+          hostPort: 30008
+        volumeMounts:
+        - name: redis-config
+          mountPath: /usr/local/etc/redis
+          readOnly: true
+      - name: redis-sentinel
+        image: redis
+        command: ["redis-sentinel", /usr/local/etc/redis/sentinel.conf]
+        ports:
+        - containerPort: 26379
+        volumeMounts:
+        - name: redis-sentinel-config
+          mountPath: /usr/local/etc/redis
+      volumes:
+      - name: redis-config
+        configMap:
+          name: redis-master-config
+          items:
+          - key: redis.conf
+            path: redis.conf
+      - name: redis-sentinel-config
+        persistentVolumeClaim:
+          claimName: pvc-redis-sentinel
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-slave
+  labels:
+    app: redis-slave
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-slave
+  serviceName: "redis-slave"
+  template:
+    metadata:
+      labels:
+        app: redis-slave
+    spec:
+      nodeSelector:
+        node: worker
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: redis-slave
+        image: redis
+        command: ["redis-server", /usr/local/etc/redis/redis.conf]
+        ports:
+        - containerPort: 6379
+          hostPort: 30008
+        volumeMounts:
+        - name: redis-slave-config
+          mountPath: /usr/local/etc/redis
+          readOnly: true
+      - name: redis-sentinel
+        image: redis
+        command: ["redis-sentinel", /usr/local/etc/redis/sentinel.conf]
+        ports:
+        - containerPort: 26379
+        volumeMounts:
+        - name: redis-sentinel-config
+          mountPath: /usr/local/etc/redis
+      volumes:
+      - name: redis-slave-config
+        configMap:
+          name: redis-slave-config
+          items:
+          - key: redis-slave.conf
+            path: redis.conf
+      - name: redis-sentinel-config
+        persistentVolumeClaim:
+          claimName: pvc-redis-sentinel
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lb
+  labels:
+    app: lb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lb
+  template:
+    metadata:
+      labels:
+        app: lb
+    spec:
+      containers:
+      - name: haproxy
+        image: haproxy
+        ports:
+        - containerPort: 6379
+          hostPort: 6379
+        - containerPort: 6380
+          hostPort: 6380
+        volumeMounts:
+        - name: config
+          mountPath: "/usr/local/etc/haproxy"
+          readOnly: true
+      nodeSelector:
+        node: master
+      volumes:
+      - name: config
+        configMap:
+          name: haproxy-config
+          items:
+          - key: haproxy.cfg
+            path: haproxy.cfg

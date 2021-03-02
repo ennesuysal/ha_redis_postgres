@@ -1,0 +1,13 @@
+configMapGenerator:
+- name: redis-master-config
+  files:
+  - configs/redis.conf
+- name: redis-slave-config
+  files:
+  - configs/redis-slave.conf
+- name: redis-sentinel-config
+  files:
+  - configs/sentinel.conf
+- name: haproxy-config
+  files:
+  - configs/haproxy.cfg
