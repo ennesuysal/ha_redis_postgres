@@ -56,7 +56,7 @@ metadata:
   labels:
     app: redis-slave
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: redis-slave
