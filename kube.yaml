@@ -16,7 +16,7 @@ spec:
         app: redis
     spec:
       nodeSelector:
-        node: master
+        node-role.kubernetes.io/master: master
       containers:
       - name: redis-master
         image: redis
@@ -67,7 +67,7 @@ spec:
         app: redis-slave
     spec:
       nodeSelector:
-        node: worker
+        node-role.kubernetes.io/worker: worker
       terminationGracePeriodSeconds: 10
       containers:
       - name: redis-slave
@@ -117,6 +117,8 @@ spec:
       labels:
         app: lb
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: master
       containers:
       - name: haproxy
         image: haproxy
@@ -129,8 +131,6 @@ spec:
         - name: config
           mountPath: "/usr/local/etc/haproxy"
           readOnly: true
-      nodeSelector:
-        node: master
       volumes:
       - name: config
         configMap:

@@ -16,7 +16,7 @@ spec:
         app: postgres
     spec:
       nodeSelector:
-        node: master
+        node-role.kubernetes.io/master: master
       initContainers:
       - name: take-data-dir-ownership
         image: crunchydata/crunchy-postgres:centos8-13.2-4.6.1
@@ -80,7 +80,7 @@ spec:
         app: postgres-replica
     spec:
       nodeSelector:
-        node: worker
+        node-role.kubernetes.io/worker: worker
       containers:
       - name: db-replica
         image: crunchydata/crunchy-postgres:centos8-13.2-4.6.1
