@@ -11,15 +11,7 @@ spec:
   persistentVolumeReclaimPolicy: Delete
   storageClassName: db
   hostPath:
-    path: /mnt/pv-data/db
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: node
-          operator: In
-          values:
-          - master    
+    path: /mnt/pv-data/db    
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

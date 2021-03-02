@@ -127,6 +127,12 @@ spec:
           hostPort: 6379
         - containerPort: 6380
           hostPort: 6380
+        - containerPort: 5432
+          hostPort: 5432
+        - containerPort: 5433
+          hostPort: 5433
+        - containerPort: 8080
+          hostPort: 8080
         volumeMounts:
         - name: config
           mountPath: "/usr/local/etc/haproxy"
