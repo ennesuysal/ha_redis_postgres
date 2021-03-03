@@ -96,8 +96,9 @@ metadata:
 apiVersion: v1
 data:
   sentinel.conf: |
+    sentinel resolve-hostnames yes
     sentinel auth-pass mymaster 123
-    sentinel monitor mymaster 10.0.53.181 6379 2
+    sentinel monitor mymaster redis-master 6379 2
     sentinel down-after-milliseconds mymaster 600
     sentinel failover-timeout mymaster 1800
 kind: ConfigMap
