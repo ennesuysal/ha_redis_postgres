@@ -23,7 +23,6 @@ spec:
         command: ["redis-server", /usr/local/etc/redis/redis.conf]
         ports:
         - containerPort: 6379
-          hostPort: 30008
         volumeMounts:
         - name: redis-config
           mountPath: /usr/local/etc/redis
@@ -66,16 +65,24 @@ spec:
       labels:
         app: redis-slave
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                  - redis-slave
+            topologyKey: "kubernetes.io/hostname"
       nodeSelector:
         node-role.kubernetes.io/worker: worker
-      terminationGracePeriodSeconds: 10
       containers:
       - name: redis-slave
         image: redis
         command: ["redis-server", /usr/local/etc/redis/redis.conf]
         ports:
         - containerPort: 6379
-          hostPort: 30008
         volumeMounts:
         - name: redis-slave-config
           mountPath: /usr/local/etc/redis

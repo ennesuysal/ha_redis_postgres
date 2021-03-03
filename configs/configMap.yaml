@@ -62,6 +62,7 @@ data:
 
         server master redis-0.redis-master.default.svc.cluster.local:6379 maxconn 1024 check inter 1s resolvers mydns init-addr none
         server server2 redis-slave-0.redis-slave.default.svc.cluster.local:6379 maxconn 1024 check inter 1s resolvers mydns init-addr none
+        server server3 redis-slave-1.redis-slave.default.svc.cluster.local:6379 maxconn 1024 check inter 1s resolvers mydns init-addr none
 
     frontend redis-slave
         bind *:6380
@@ -78,6 +79,7 @@ data:
 
         server master redis-0.redis-master.default.svc.cluster.local:6379 maxconn 1024 check inter 1s resolvers mydns init-addr none
         server server2 redis-slave-0.redis-slave.default.svc.cluster.local:6379 maxconn 1024 check inter 1s resolvers mydns init-addr none
+        server server3 redis-slave-1.redis-slave.default.svc.cluster.local:6379 maxconn 1024 check inter 1s resolvers mydns init-addr none
 
 kind: ConfigMap
 metadata:
