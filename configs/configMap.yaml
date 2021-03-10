@@ -2,7 +2,7 @@ apiVersion: v1
 data:
   haproxy.cfg: |
     resolvers mydns
-        nameserver dns1 10.96.0.10:53
+        nameserver dns1 10.96.0.10:53 # enter your own dns
         accepted_payload_size 8192 # allow larger DNS payloads
     global
         maxconn 50000
