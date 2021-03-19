@@ -28,6 +28,19 @@ fi
 kubectl cluster-info > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
+	master=$(kubectl get node --selector='node-role.kubernetes.io/master' -o custom-columns=':metadata.name')
+	workers=$(kubectl get node --selector='!node-role.kubernetes.io/master' -o custom-columns=':metadata.name')
+
+	echo "Master: $master"
+	echo "Workers: $workers"
+
+	kubectl label node $master node-role.kubernetes.io/master=master --overwrite
+
+	for x in $workers; do
+		if [ $x != "" ]; then
+			kubectl label node $x node-role.kubernetes.io/worker=worker --overwrite
+		fi
+	done
 	kubectl create -f configs/configMap.yaml
 	kubectl create -f volumes/pv_db.yaml
 	kubectl create -f volumes/pv_redis_sentinel.yaml

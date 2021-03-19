@@ -109,5 +109,4 @@ spec:
           value: "/pgdata"
         ports:
         - containerPort: 5432
-          #hostPort: 5432
 
